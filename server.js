@@ -1,5 +1,10 @@
 'use strict';
 
+// export PORT=3000
+// export CLIENT_URL=http://localhost:8080
+// export DATABASE_URL=postgres://localhost:5432/books_app
+
+
 const express = require('express');
 const cors = require('cors');
 const pg = require('pg');
