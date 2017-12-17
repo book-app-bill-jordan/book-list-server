@@ -4,7 +4,6 @@
 // export CLIENT_URL=http://localhost:8080
 // export DATABASE_URL=postgres://localhost:5432/books_app
 
-
 const express = require('express');
 const cors = require('cors');
 const pg = require('pg');
@@ -30,7 +29,6 @@ app.get('/api/v1/books', (request, response) => {
 
 
 app.get('/api/v1/books/find', (req, res) => {
-  console.log(req.query)
   let url = 'https://www.googleapis.com/books/v1/volumes';
   let query = ''
   if(req.query.title) query += `+intitle:${req.query.title}`;
@@ -58,15 +56,14 @@ app.get('/api/v1/books/find', (req, res) => {
 })
 
 app.get('/api/v1/books/find/:isbn', (req, res) => {
-  console.log('inside find:isbn')
-  console.log(req.params.isbn)
   let url = 'https://www.googleapis.com/books/v1/volumes';
   superagent.get(url)
     .query({'q': `+isbn:${req.params.isbn}`})
     .query({'key': API_KEY})
-    .then(response => response.body.items.map((book, idx) => {
+    .then(res => res.body.items.map((book, idx) => {
       let { title, authors, industryIdentifiers, imageLinks, description } = book.volumeInfo;
       let placeholderImage = 'http://www.newyorkpaddy.com/images/covers/NoCoverAvailable.jpg';
+      console.log(res)
 
       return {
         title: title ? title : 'No title available',
@@ -82,15 +79,12 @@ app.get('/api/v1/books/find/:isbn', (req, res) => {
 })
 
 app.get('/api/v1/books/:id', (request, response) => {
-  // console.log(request)
   client.query(`SELECT book_id, title, author, isbn, image_url, description FROM books WHERE book_id=${request.params.id};`)
-  // .then(results => console.log(results.rows))
   .then(result => response.send(result.rows))
   .catch(console.error);
 });
 
 app.put('/api/v1/books/:id', bodyparser, (request, response) => {
-  console.log(request.body)
   client.query(
     `UPDATE books SET title=$1, author=$2, isbn=$3, image_url=$4, description=$5 WHERE book_id=$6;`,
     [request.body.title, request.body.author, request.body.isbn, request.body.image_url, request.body.description, request.params.id]
@@ -100,7 +94,6 @@ app.put('/api/v1/books/:id', bodyparser, (request, response) => {
 });
 
 app.post('/api/v1/books', (request, response) => {
-  console.log(request.body);
   client.query(
     'INSERT INTO books (title, author, isbn, image_url, description) VALUES ($1,$2,$3,$4,$5)',
     [request.body.title, request.body.author, request.body.isbn, request.body.image_url, request.body.description],
@@ -110,12 +103,6 @@ app.post('/api/v1/books', (request, response) => {
     }
   )
 })
-
-
-
-// app.get('api/vi/admin', req res resetView.send(TOKEN))
-
-
 
 app.delete('/api/v1/books/:id', (request, response) => {
   client.query(
